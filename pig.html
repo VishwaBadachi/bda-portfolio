@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BDA Portfolio - Apache Pig</title>
+    
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f7f6; color: #333; line-height: 1.6; }
+        .container { max-width: 960px; margin: 20px auto; padding: 0 20px; }
+        header { background-color: #0a4a6e; color: #ffffff; padding: 40px 20px; text-align: center; border-radius: 8px 8px 0 0; }
+        header h1 { margin: 0; font-size: 2.5em; }
+        header p { font-size: 1.2em; opacity: 0.9; margin-top: 10px; }
+        nav { background-color: #333; overflow: hidden; }
+        nav ul { list-style-type: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; }
+        nav li { flex-grow: 1; }
+        nav a { display: block; color: white; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 0.95em; transition: background-color 0.3s; }
+        nav a:hover { background-color: #575757; }
+        nav a.active { background-color: #007bff; font-weight: bold; }
+        main { background-color: #ffffff; padding: 30px; border-radius: 0 0 8px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        section { margin-bottom: 30px; }
+        section h2 { color: #0a4a6e; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 20px; }
+        section h3 { color: #005a9c; }
+        pre { background-color: #2b2b2b; color: #f8f8f2; padding: 15px; border-radius: 5px; overflow-x: auto; font-family: 'Courier New', Courier, monospace; font-size: 0.9em; }
+        code { font-family: 'Courier New', Courier, monospace; }
+        :not(pre) > code { background-color: #eee; padding: 2px 5px; border-radius: 3px; color: #c7254e; }
+        footer { text-align: center; margin-top: 30px; padding: 20px; font-size: 0.9em; color: #777; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Apache Pig</h1>
+        <p>Data Flow Scripting with Pig Latin</p>
+    </header>
+
+    <div class="container">
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="hadoop.html">1. Hadoop</a></li>
+                <li><a href="pig.html" class="active">2. Apache Pig</a></li>
+                <li><a href="hive.html">3. Apache Hive</a></li>
+                <li><a href="mongodb.html">4. MongoDB</a></li>
+                <li><a href="project.html">5. Course Project</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <section id="intro">
+                <h2>Introduction to Pig</h2>
+                <p>Apache Pig is a high-level platform for creating MapReduce programs. It uses a scripting language called <strong>Pig Latin</strong>, which allows for easy data-flow programming. Pig scripts are translated into MapReduce jobs by the Pig interpreter.</p>
+            </section>
+
+            <section id="wordcount">
+                <h2>Pig Latin Word Count Example</h2>
+                <p>Here is the same Word Count example, but implemented in just 5 lines of Pig Latin.</p>
+<pre><code>-- 1. Load the input data (e.g., input.txt)
+lines = LOAD 'hdfs:///input/my_text_file.txt' AS (line:chararray);
+
+-- 2. Tokenize each line into words, and flatten the resulting bag of words
+words = FOREACH lines GENERATE FLATTEN(TOKENIZE(line)) AS word;
+
+-- 3. Group the words by the word itself
+grouped = GROUP words BY word;
+
+-- 4. Count the occurrences in each group
+counts = FOREACH grouped GENERATE group AS word, COUNT(words) AS total;
+
+-- 5. Dump the results to the screen (or use STORE to save to HDFS)
+DUMP counts;</code></pre>
+            </section>
+            
+            <section id="commands">
+                <h2>Core Command Demonstrations</h2>
+                <p>Let's use two sample datasets to demonstrate <code>FILTER</code>, <code>JOIN</code>, <code>GROUP</code>, and <code>ORDER</code>.</p>
+                
+                <p><strong>Sample Data: `employees.txt`</strong> (id, name, dept_id, salary)</p>
+<pre><code>101,Alice,10,50000
+102,Bob,10,60000
+103,Charlie,20,75000
+104,David,20,45000
+105,Eve,30,80000</code></pre>
+
+                <p><strong>Sample Data: `departments.txt`</strong> (id, dept_name)</p>
+<pre><code>10,Engineering
+20,Sales
+30,HR</code></pre>
+
+                <h3>Pig Latin Script</h3>
+<pre><code>-- Load the data
+employees = LOAD 'employees.txt' USING PigStorage(',') 
+    AS (id:int, name:chararray, dept_id:int, salary:int);
+    
+departments = LOAD 'departments.txt' USING PigStorage(',') 
+    AS (id:int, dept_name:chararray);
+
+-- 1. FILTER
+-- Find employees earning more than 55000
+high_earners = FILTER employees BY salary > 55000;
+-- DUMP high_earners;
+-- (102,Bob,10,60000)
+-- (103,Charlie,20,75000)
+-- (105,Eve,30,80000)
+
+
+-- 2. JOIN
+-- Join employees and departments on department ID
+joined_data = JOIN employees BY dept_id, departments BY id;
+-- DUMP joined_data;
+-- (101,Alice,10,50000,10,Engineering)
+-- (102,Bob,10,60000,10,Engineering)
+-- (103,Charlie,20,75000,20,Sales)
+-- (104,David,20,45000,20,Sales)
+-- (105,Eve,30,80000,30,HR)
+
+
+-- 3. GROUP
+-- Group employees by their department ID
+grouped_by_dept = GROUP employees BY dept_id;
+-- DUMP grouped_by_dept;
+-- (10,{(101,Alice,10,50000),(102,Bob,10,60000)})
+-- (20,{(103,Charlie,20,75000),(104,David,20,45000)})
+-- (30,{(105,Eve,30,80000)})
+
+-- We can also calculate average salary per department
+avg_salary_by_dept = FOREACH grouped_by_dept GENERATE group AS dept_id, AVG(employees.salary);
+-- DUMP avg_salary_by_dept;
+-- (10,55000.0)
+-- (20,60000.0)
+-- (30,80000.0)
+
+
+-- 4. ORDER
+-- Order all employees by their salary in descending order
+sorted_employees = ORDER employees BY salary DESC;
+-- DUMP sorted_employees;
+-- (105,Eve,30,80000)
+-- (103,Charlie,20,75000)
+-- (102,Bob,10,60000)
+-- (101,Alice,10,50000)
+-- (104,David,20,45000)</code></pre>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 [Your Name Here] - All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

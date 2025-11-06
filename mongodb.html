@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BDA Portfolio - MongoDB</title>
+    
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f7f6; color: #333; line-height: 1.6; }
+        .container { max-width: 960px; margin: 20px auto; padding: 0 20px; }
+        header { background-color: #0a4a6e; color: #ffffff; padding: 40px 20px; text-align: center; border-radius: 8px 8px 0 0; }
+        header h1 { margin: 0; font-size: 2.5em; }
+        header p { font-size: 1.2em; opacity: 0.9; margin-top: 10px; }
+        nav { background-color: #333; overflow: hidden; }
+        nav ul { list-style-type: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; }
+        nav li { flex-grow: 1; }
+        nav a { display: block; color: white; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 0.95em; transition: background-color 0.3s; }
+        nav a:hover { background-color: #575757; }
+        nav a.active { background-color: #007bff; font-weight: bold; }
+        main { background-color: #ffffff; padding: 30px; border-radius: 0 0 8px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        section { margin-bottom: 30px; }
+        section h2 { color: #0a4a6e; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 20px; }
+        section h3 { color: #005a9c; }
+        pre { background-color: #2b2b2b; color: #f8f8f2; padding: 15px; border-radius: 5px; overflow-x: auto; font-family: 'Courier New', Courier, monospace; font-size: 0.9em; }
+        code { font-family: 'Courier New', Courier, monospace; }
+        :not(pre) > code { background-color: #eee; padding: 2px 5px; border-radius: 3px; color: #c7254e; }
+        footer { text-align: center; margin-top: 30px; padding: 20px; font-size: 0.9em; color: #777; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>MongoDB Key Concepts</h1>
+        <p>A Summary from Professional Coursework</p>
+    </header>
+
+    <div class="container">
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="hadoop.html">1. Hadoop</a></li>
+                <li><a href="pig.html">2. Apache Pig</a></li>
+                <li><a href="hive.html">3. Apache Hive</a></li>
+                <li><a href="mongodb.html" class="active">4. MongoDB</a></li>
+                <li><a href="project.html">5. Course Project</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <section id="core">
+                <h2>Core Concepts</h2>
+                <p>MongoDB is a NoSQL, document-oriented database. Instead of tables and rows, it uses <strong>collections</strong> and <strong>documents</strong>.</p>
+                <ul>
+                    <li><strong>Document:</strong> A BSON (binary JSON) object. This is the basic unit of data. It's a set of key-value pairs, much like a JSON object.
+                        <pre><code>{ "_id": ObjectId("..."), "name": "Alice", "age": 30, "city": "New York" }</code></pre>
+                    </li>
+                    <li><strong>Collection:</strong> A group of documents. This is the equivalent of a table in a relational database, but it does not enforce a strict schema.</li>
+                    <li><strong>Flexible Schema:</strong> Different documents in the same collection can have different fields. This is powerful for evolving applications.</li>
+                </ul>
+            </section>
+            
+            <section id="crud">
+                <h2>Basic CRUD Operations</h2>
+                <p>CRUD (Create, Read, Update, Delete) operations are the bread and butter of any database.</p>
+<pre><code>// Use a specific database
+use("myDatabase");
+
+// CREATE: Insert a single document
+db.users.insertOne({ "name": "Bob", "age": 25, "status": "active" });
+
+// READ: Find documents
+db.users.find({ "status": "active" }); // Find all users with status "active"
+db.users.findOne({ "name": "Bob" });   // Find the first user named "Bob"
+
+// UPDATE: Modify a document
+db.users.updateOne(
+    { "name": "Bob" },                  // Filter: Find documents to update
+    { $set: { "age": 26 } }             // Update: Set the age to 26
+);
+
+// DELETE: Remove documents
+db.users.deleteOne({ "name": "Bob" });</code></pre>
+            </section>
+
+            <section id="indexing">
+                <h2>Key Concept: Indexing</h2>
+                <p>Indexing is the most important concept for MongoDB performance. Without indexes, MongoDB must perform a <strong>collection scan</strong> (reading every document) to find matching query results.</p>
+                <p>An index stores the value of a specific field (or fields) in a pre-sorted order, allowing MongoDB to find data extremely quickly.</p>
+                
+                <h3>Single-Field Index</h3>
+                <p>Used to speed up queries on a single field.</p>
+<pre><code>// Creates an ascending (1) index on the 'name' field
+db.users.createIndex({ "name": 1 });
+
+// This query will now use the index and be very fast
+db.users.find({ "name": "Alice" });</code></pre>
+
+                <h3>Compound Index</h3>
+                <p>An index on multiple fields. The order of fields matters.</p>
+<pre><code>// Creates an index on 'status' (ascending) then 'age' (descending)
+db.users.createIndex({ "status": 1, "age": -1 });
+
+// This query can be fully supported by the index
+db.users.find({ "status": "active" }).sort({ "age": -1 });
+
+// This query can also use part of the index ("status")
+db.users.find({ "status": "pending" });</code></pre>
+            </section>
+            
+            <section id="aggregation">
+                <h2>Key Concept: Aggregation Framework</h2>
+                <p>The Aggregation Framework is MongoDB's way of performing data processing and analysis, similar to <code>GROUP BY</code> in SQL or a Pig/Hive script.</p>
+                <p>It uses a <strong>pipeline</strong> concept, where documents pass through a series of stages, each performing a transformation.</p>
+                
+                <h3>Example Pipeline</h3>
+                <p>Let's say we have a <code>products</code> collection. We want to find the average price of all "Electronics" products, grouped by their sub-category.</p>
+<pre><code>db.products.aggregate([
+    {
+        // Stage 1: Filter the documents (like WHERE)
+        $match: { "category": "Electronics" }
+    },
+    {
+        // Stage 2: Group by sub_category and calculate average (like GROUP BY)
+        $group: {
+            "_id": "$sub_category",  // Group by this field
+            "averagePrice": { $avg: "$price" },
+            "itemCount": { $sum: 1 }
+        }
+    },
+    {
+        // Stage 3: Sort the results by average price
+        $sort: { "averagePrice": -1 } // -1 for descending
+    }
+]);</code></pre>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 [Your Name Here] - All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

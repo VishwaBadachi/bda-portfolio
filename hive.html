@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BDA Portfolio - Apache Hive</title>
+    
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f7f6; color: #333; line-height: 1.6; }
+        .container { max-width: 960px; margin: 20px auto; padding: 0 20px; }
+        header { background-color: #0a4a6e; color: #ffffff; padding: 40px 20px; text-align: center; border-radius: 8px 8px 0 0; }
+        header h1 { margin: 0; font-size: 2.5em; }
+        header p { font-size: 1.2em; opacity: 0.9; margin-top: 10px; }
+        nav { background-color: #333; overflow: hidden; }
+        nav ul { list-style-type: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; }
+        nav li { flex-grow: 1; }
+        nav a { display: block; color: white; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 0.95em; transition: background-color 0.3s; }
+        nav a:hover { background-color: #575757; }
+        nav a.active { background-color: #007bff; font-weight: bold; }
+        main { background-color: #ffffff; padding: 30px; border-radius: 0 0 8px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        section { margin-bottom: 30px; }
+        section h2 { color: #0a4a6e; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 20px; }
+        section h3 { color: #005a9c; }
+        pre { background-color: #2b2b2b; color: #f8f8f2; padding: 15px; border-radius: 5px; overflow-x: auto; font-family: 'Courier New', Courier, monospace; font-size: 0.9em; }
+        code { font-family: 'Courier New', Courier, monospace; }
+        :not(pre) > code { background-color: #eee; padding: 2px 5px; border-radius: 3px; color: #c7254e; }
+        footer { text-align: center; margin-top: 30px; padding: 20px; font-size: 0.9em; color: #777; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Apache Hive</h1>
+        <p>Data Warehousing and SQL-like Queries on Hadoop</p>
+    </header>
+
+    <div class="container">
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="hadoop.html">1. Hadoop</a></li>
+                <li><a href="pig.html">2. Apache Pig</a></li>
+                <li><a href="hive.html" class="active">3. Apache Hive</a></li>
+                <li><a href="mongodb.html">4. MongoDB</a></li>
+                <li><a href="project.html">5. Course Project</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <section id="intro">
+                <h2>Introduction to Hive</h2>
+                <p>Apache Hive provides a data warehouse infrastructure on top of Hadoop. It gives an SQL-like interface, called <strong>HiveQL (HQL)</strong>, to query data stored in HDFS. Hive translates HQL queries into MapReduce or Tez/Spark jobs.</p>
+                <p>We will use the same 'employees' and 'departments' data as in the Pig example.</p>
+            </section>
+            
+            <section id="setup">
+                <h3>1. Creating Tables</h3>
+                <p>First, we define the schema for our data.</p>
+<pre><code>-- Create the employees table
+CREATE TABLE employees (
+    id INT,
+    name STRING,
+    dept_id INT,
+    salary INT
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ',';
+
+-- Create the departments table
+CREATE TABLE departments (
+    id INT,
+    dept_name STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ',';
+
+-- Load data from HDFS (assuming files are there)
+LOAD DATA INPATH '/input/employees.txt' INTO TABLE employees;
+LOAD DATA INPATH '/input/departments.txt' INTO TABLE departments;</code></pre>
+            </section>
+
+            <section id="commands">
+                <h2>2. HQL Command Demonstrations</h2>
+                
+                <h3>SELECT</h3>
+                <p>Select specific columns with a <code>WHERE</code> clause.</p>
+<pre><code>-- Find all employees in department 20 with a salary over 50000
+SELECT name, salary
+FROM employees
+WHERE dept_id = 20 AND salary > 50000;
+
+-- Result:
+-- Charlie  75000</code></pre>
+
+                <h3>JOIN</h3>
+                <p>Combine data from the <code>employees</code> and <code>departments</code> tables.</p>
+<pre><code>-- Get the name of each employee and their department name
+SELECT e.name, d.dept_name
+FROM employees e
+JOIN departments d ON e.dept_id = d.id;
+
+-- Result:
+-- Alice    Engineering
+-- Bob      Engineering
+-- Charlie  Sales
+-- David    Sales
+-- Eve      HR</code></pre>
+
+                <h3>AGGREGATION and GROUP BY</h3>
+                <p>Perform aggregate calculations (like <code>AVG</code>, <code>SUM</code>, <code>COUNT</code>) on groups of data.</p>
+<pre><code>-- Find the average salary and number of employees for each department
+SELECT
+    d.dept_name,
+    AVG(e.salary) AS avg_salary,
+    COUNT(e.id) AS employee_count
+FROM employees e
+JOIN departments d ON e.dept_id = d.id
+GROUP BY d.dept_name;
+
+-- Result:
+-- Engineering  55000.0   2
+-- HR           80000.0   1
+-- Sales        60000.0   2</code></pre>
+            </section>
+            
+            <section id="partitioning">
+                <h2>3. Partitioning</h2>
+                <p>Partitioning is a key optimization technique. It divides a table into parts based on the values of a specific column (e.g., date, country). This allows Hive to skip reading data that isn't relevant to a query, dramatically speeding up performance.</p>
+                
+                <h3>Example: Creating a Partitioned Table</h3>
+<pre><code>-- Create a table for log data, partitioned by the event date
+CREATE TABLE event_logs (
+    timestamp_ms BIGINT,
+    log_level STRING,
+    message STRING
+)
+PARTITIONED BY (event_date STRING); -- The partition column</code></pre>
+
+                <h3>Loading Data into Partitions</h3>
+                <p>You must specify the partition when loading data.</p>
+<pre><code>-- Load logs for a specific date
+LOAD DATA INPATH '/input/logs/2025-11-05.log'
+INTO TABLE event_logs
+PARTITION (event_date = '2025-11-05');
+
+-- Load logs for another date
+LOAD DATA INPATH '/input/logs/2025-11-06.log'
+INTO TABLE event_logs
+PARTITION (event_date = '2025-11-06');</code></pre>
+                
+                <h3>Querying a Partitioned Table</h3>
+                <p>When you filter on the partition column, Hive only reads the data in that partition's directory.</p>
+<pre><code>-- This query is fast, as it only reads the '2025-11-06' partition
+SELECT *
+FROM event_logs
+WHERE event_date = '2025-11-06' AND log_level = 'ERROR';</code></pre>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 [Your Name Here] - All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
