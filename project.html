@@ -1,148 +1,78 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Project Report Viewer</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>View Project Report</title>
 
-  <!-- Basic styling for a full-page viewer -->
   <style>
-    :root{
-      --bg: #0f1724;
-      --panel: #0b1220;
-      --accent: #6ee7b7;
-      --muted: #9aa4b2;
+    html, body {
+      margin: 0;
+      height: 100%;
+      width: 100%;
+      background-color: #0f1724;
+      font-family: Arial, sans-serif;
+      color: #e6eef6;
     }
-    html,body { height:100%; margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial; background:var(--bg); color:#e6eef6; }
-    .toolbar {
-      height:56px;
-      display:flex;
-      align-items:center;
-      gap:12px;
-      padding:8px 16px;
-      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04));
-      border-bottom:1px solid rgba(255,255,255,0.03);
-      box-shadow: 0 2px 8px rgba(2,6,23,0.4);
+
+    header {
+      background: #111827;
+      color: #6ee7b7;
+      font-size: 18px;
+      padding: 12px 20px;
+      border-bottom: 1px solid #1f2937;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
-    .brand { font-weight:600; font-size:16px; color:var(--accent); }
-    .spacer { flex:1; }
-    .note { color:var(--muted); font-size:13px; margin-left:8px; }
-    .viewer {
-      position:fixed;
-      top:56px;
-      bottom:0;
-      left:0;
-      right:0;
-      display:flex;
-      align-items:stretch;
-      justify-content:stretch;
-    }
+
     iframe {
-      width:100%;
-      height:100%;
-      border:0;
+      width: 100%;
+      height: calc(100% - 52px);
+      border: none;
       background: white;
     }
-    .loader {
-      position:absolute;
-      left:50%;
-      top:50%;
-      transform:translate(-50%,-50%);
-      display:flex;
-      gap:12px;
-      align-items:center;
-      color:var(--muted);
-      font-size:14px;
+
+    .loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #9aa4b2;
+      font-size: 16px;
     }
-    .hidden { display:none; }
-    /* Make it look nice on mobile */
-    @media (max-width:640px){
-      .toolbar { padding:8px 12px; height:48px; }
-      .brand { font-size:14px; }
+
+    @media (max-width: 640px) {
+      header {
+        font-size: 16px;
+        padding: 10px 14px;
+      }
     }
   </style>
-
-  <!-- Some basic security meta tags (won't fix server-side headers) -->
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <!-- If you want to restrict framing origins, set server-side headers. -->
 </head>
+
 <body>
-  <div class="toolbar" role="toolbar" aria-label="Report viewer toolbar">
-    <div class="brand">Project Report</div>
-    <div class="note">Viewing: <strong>project_report.pdf</strong></div>
-    <div class="spacer"></div>
-    <!-- Optional: show a message about print/download -->
-    <div class="note" style="font-size:12px">This is a view-only embed. Right-click and keyboard shortcuts are lightly disabled.</div>
-  </div>
+  <header>
+    📘 Project Report Viewer
+  </header>
 
-  <div class="viewer" id="viewer">
-    <div id="loader" class="loader">
-      <svg width="20" height="20" viewBox="0 0 50 50" aria-hidden><circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-dasharray="31.4 31.4" transform="rotate(0 25 25)"><animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s" repeatCount="indefinite"></animateTransform></circle></svg>
-      <div>Loading report…</div>
-    </div>
+  <div id="loading" class="loading">Loading report...</div>
 
-    <!-- The embedded report; change src if file is in a different path -->
-    <iframe id="reportFrame" src="project_report.pdf" title="Project report" sandbox="allow-same-origin allow-scripts"></iframe>
-
-    <!-- Fallback if iframe is blocked by server X-Frame-Options -->
-    <div id="blockedMessage" class="loader hidden" style="flex-direction:column; text-align:center; gap:8px;">
-      <div style="font-weight:600">Unable to display the report inline</div>
-      <div style="max-width:520px;color:var(--muted);">
-        The server hosting <strong>project_report.html</strong> appears to disallow embedding in an iframe (e.g. X-Frame-Options or Content-Security-Policy). To fix, allow embedding from this origin on the server or serve the file from the same origin.
-      </div>
-    </div>
-  </div>
+  <!-- Display your PDF file directly here -->
+  <iframe id="reportFrame" src="project_report.pdf" title="Project Report"></iframe>
 
   <script>
     const frame = document.getElementById('reportFrame');
-    const loader = document.getElementById('loader');
-    const blocked = document.getElementById('blockedMessage');
+    const loading = document.getElementById('loading');
 
-    // Hide loader once iframe content has loaded
     frame.addEventListener('load', () => {
-      // If iframe is same-origin we can check content; otherwise just hide loader
-      try {
-        // Accessing frame.contentDocument may throw if cross-origin
-        const doc = frame.contentDocument || frame.contentWindow.document;
-        // If title or body exist, assume loaded normally
-        if (doc && (doc.title || doc.body)) {
-          loader.classList.add('hidden');
-          blocked.classList.add('hidden');
-        } else {
-          loader.classList.add('hidden');
-        }
-      } catch (e) {
-        // Cross-origin frames will throw here; still hide loader
-        loader.classList.add('hidden');
-      }
+      loading.style.display = 'none';
     });
 
-    // Some basic (lightweight) UI measures to discourage easy saving/copying:
-    // NOTE: these are not secure — users can still save, view-source, or fetch the file directly.
-    document.addEventListener('contextmenu', e => { e.preventDefault(); });
+    // Optional: Prevent download shortcuts (not bulletproof)
+    document.addEventListener('contextmenu', e => e.preventDefault());
     document.addEventListener('keydown', e => {
-      // Block Ctrl+S / Cmd+S, Ctrl+P (print), Ctrl+U (view source) and F12
-      if ((e.ctrlKey || e.metaKey) && ['s','p','u'].includes(e.key.toLowerCase())) {
-        e.preventDefault();
-      }
+      if ((e.ctrlKey || e.metaKey) && ['s','p','u'].includes(e.key.toLowerCase())) e.preventDefault();
       if (e.key === 'F12') e.preventDefault();
     });
-
-    // Detect if iframe blocked by frame-ancestors or X-Frame-Options:
-    // If after 2.5s iframe still has empty document (and not cross-origin), show blocked msg.
-    setTimeout(() => {
-      try {
-        const doc = frame.contentDocument;
-        if (!doc || !doc.body || doc.body.childElementCount === 0) {
-          loader.classList.add('hidden');
-          blocked.classList.remove('hidden');
-        }
-      } catch (_) {
-        // cross-origin — can't determine; assume it's fine
-      }
-    }, 2500);
   </script>
 </body>
 </html>
-
-
