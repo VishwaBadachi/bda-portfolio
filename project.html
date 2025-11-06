@@ -1,155 +1,146 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BDA Portfolio - Course Project</title>
-    
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f7f6; color: #333; line-height: 1.6; }
-        .container { max-width: 960px; margin: 20px auto; padding: 0 20px; }
-        header { background-color: #0a4a6e; color: #ffffff; padding: 40px 20px; text-align: center; border-radius: 8px 8px 0 0; }
-        header h1 { margin: 0; font-size: 2.5em; }
-        header p { font-size: 1.2em; opacity: 0.9; margin-top: 10px; }
-        nav { background-color: #333; overflow: hidden; }
-        nav ul { list-style-type: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; }
-        nav li { flex-grow: 1; }
-        nav a { display: block; color: white; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 0.95em; transition: background-color 0.3s; }
-        nav a:hover { background-color: #575757; }
-        nav a.active { background-color: #007bff; font-weight: bold; }
-        main { background-color: #ffffff; padding: 30px; border-radius: 0 0 8px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        section { margin-bottom: 30px; }
-        section h2 { color: #0a4a6e; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 20px; }
-        section h3 { color: #005a9c; }
-        pre { background-color: #2b2b2b; color: #f8f8f2; padding: 15px; border-radius: 5px; overflow-x: auto; font-family: 'Courier New', Courier, monospace; font-size: 0.9em; }
-        code { font-family: 'Courier New', Courier, monospace; }
-        :not(pre) > code { background-color: #eee; padding: 2px 5px; border-radius: 3px; color: #c7254e; }
-        footer { text-align: center; margin-top: 30px; padding: 20px; font-size: 0.9em; color: #777; }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Project Report Viewer</title>
+
+  <!-- Basic styling for a full-page viewer -->
+  <style>
+    :root{
+      --bg: #0f1724;
+      --panel: #0b1220;
+      --accent: #6ee7b7;
+      --muted: #9aa4b2;
+    }
+    html,body { height:100%; margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial; background:var(--bg); color:#e6eef6; }
+    .toolbar {
+      height:56px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:8px 16px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04));
+      border-bottom:1px solid rgba(255,255,255,0.03);
+      box-shadow: 0 2px 8px rgba(2,6,23,0.4);
+    }
+    .brand { font-weight:600; font-size:16px; color:var(--accent); }
+    .spacer { flex:1; }
+    .note { color:var(--muted); font-size:13px; margin-left:8px; }
+    .viewer {
+      position:fixed;
+      top:56px;
+      bottom:0;
+      left:0;
+      right:0;
+      display:flex;
+      align-items:stretch;
+      justify-content:stretch;
+    }
+    iframe {
+      width:100%;
+      height:100%;
+      border:0;
+      background: white;
+    }
+    .loader {
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      display:flex;
+      gap:12px;
+      align-items:center;
+      color:var(--muted);
+      font-size:14px;
+    }
+    .hidden { display:none; }
+    /* Make it look nice on mobile */
+    @media (max-width:640px){
+      .toolbar { padding:8px 12px; height:48px; }
+      .brand { font-size:14px; }
+    }
+  </style>
+
+  <!-- Some basic security meta tags (won't fix server-side headers) -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <!-- If you want to restrict framing origins, set server-side headers. -->
 </head>
 <body>
+  <div class="toolbar" role="toolbar" aria-label="Report viewer toolbar">
+    <div class="brand">Project Report</div>
+    <div class="note">Viewing: <strong>project_report.html</strong></div>
+    <div class="spacer"></div>
+    <!-- Optional: show a message about print/download -->
+    <div class="note" style="font-size:12px">This is a view-only embed. Right-click and keyboard shortcuts are lightly disabled.</div>
+  </div>
 
-    <header>
-        <h1>Course Project</h1>
-        <p>Big Data Analysis of NYC Taxi Trip Data</p>
-    </header>
-
-    <div class="container">
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="hadoop.html">1. Hadoop</a></li>
-                <li><a href="pig.html">2. Apache Pig</a></li>
-                <li><a href="hive.html">3. Apache Hive</a></li>
-                <li><a href="mongodb.html">4. MongoDB</a></li>
-                <li><a href="project.html" class="active">5. Course Project</a></li>
-            </ul>
-        </nav>
-
-        <main>
-            <section id="objective">
-                <h2>1. Project Objective</h2>
-                <p>The goal of this project was to analyze the publicly available NYC Taxi Trip dataset (Yellow Taxis) to extract actionable insights. The dataset is notorious for its large size (billions of records) and requires a big data technology stack for effective processing.</p>
-                <p><strong>Key questions to answer:</strong></p>
-                <ul>
-                    <li>What are the most popular pickup and dropoff locations?</li>
-                    <li>How does payment type (cash vs. credit) affect tip amounts?</li>
-                    <li>What are the busiest times of the day and days of the week?</li>
-                    <li>How do trip duration and distance correlate with the total fare?</li>
-                </ul>
-            </section>
-
-            <section id="stack">
-                <h2>2. Technology Stack</h2>
-                <ul>
-                    <li><strong>Storage:</strong> Hadoop Distributed File System (HDFS) for storing the raw CSV data.</li>
-                    <li><strong>Data Cleaning (ETL):</strong> <strong>Apache Pig</strong> for loading, cleaning, filtering, and transforming the raw data into a structured format.</li>
-                    <li><strong>Data Analysis (Warehousing):</strong> <strong>Apache Hive</strong> for storing the cleaned, structured data and performing complex analytical queries.</li>
-                </ul>
-            </section>
-            
-            <section id="pig-etl">
-                <h2>3. Data Processing (Apache Pig)</h2>
-                <p>The raw CSV data was often messy, with invalid coordinates, zero-value fares, and incorrect timestamps. Apache Pig was used to perform the Extract, Transform, and Load (ETL) process.</p>
-                
-                <h3>Sample Pig Latin Script (ETL)</h3>
-<pre><code>-- Load the raw CSV data
--- (Skipping header, assuming 17 fields including pickup_datetime, trip_distance, fare_amount, tip_amount, payment_type, ...)
-raw_data = LOAD 'hdfs:///taxi/raw/yellow_tripdata_2025-01.csv' USING PigStorage(',') 
-    AS (vendor_id, pickup_dt:chararray, ..., trip_distance:float, fare_amount:float, tip_amount:float, payment_type:int, ...);
-
--- Filter out bad data
--- e.g., trips with no distance, no fare, or invalid payment type
-filtered_data = FILTER raw_data BY trip_distance > 0 AND fare_amount > 0 AND payment_type IN (1, 2);
-
--- Transform and project
--- Extract hour from timestamp and normalize payment type
-transformed_data = FOREACH filtered_data GENERATE
-    (int)SUBSTRING(pickup_dt, 11, 2) AS pickup_hour, -- Get hour (e.g., '2025-01-01 09:30:00' -> '09')
-    trip_distance,
-    fare_amount,
-    tip_amount,
-    (payment_type == 1 ? 'Credit' : 'Cash') AS payment_method;
-
--- Store the cleaned, structured data in a new location
-STORE transformed_data INTO 'hdfs:///taxi/cleaned/jan_2025' USING PigStorage('\t');</code></pre>
-            </section>
-            
-            <section id="hive-analysis">
-                <h2>4. Data Analysis (Apache Hive)</h2>
-                <p>Once the data was cleaned by Pig, an external Hive table was created to point to the new data. This allowed for fast, SQL-like analysis.</p>
-
-                <h3>Creating the Hive Table</h3>
-<pre><code>CREATE EXTERNAL TABLE taxi_trips (
-    pickup_hour INT,
-    trip_distance FLOAT,
-    fare_amount FLOAT,
-    tip_amount FLOAT,
-    payment_method STRING
-)
-ROW FORMAT DELIMITED
-FIELDS TERMINATED BY '\t'
-LOCATION 'hdfs:///taxi/cleaned/jan_2025';</code></pre>
-
-                <h3>Analytical Queries (HQL)</h3>
-                
-                <h4>Query 1: Average Tip by Payment Method</h4>
-<pre><code>SELECT
-    payment_method,
-    AVG(tip_amount) AS average_tip,
-    AVG(tip_amount / fare_amount) * 100 AS avg_tip_percentage
-FROM taxi_trips
-WHERE fare_amount > 0
-GROUP BY payment_method;
-
--- Finding: 'Credit' payments had a significantly higher average tip percentage.</code></pre>
-
-                <h4>Query 2: Busiest Hours of the Day</h4>
-<pre><code>SELECT
-    pickup_hour,
-    COUNT(*) AS trip_count
-FROM taxi_trips
-GROUP BY pickup_hour
-ORDER BY trip_count DESC;
-
--- Finding: Peak hours were late afternoon (5 PM - 7 PM) and late evening.</code></pre>
-            </section>
-            
-            <section id="conclusion">
-                <h2>5. Project Conclusion & Findings</h2>
-                <p>This project successfully demonstrated a complete BDA pipeline. By processing raw, large-scale data with Apache Pig and analyzing it with Apache Hive, we were able to derive several key insights:</p>
-                <ul>
-                    <li><strong>Tip Behavior:</strong> Passengers paying by credit card tipped an average of 18-20% of the fare, while cash tips were significantly lower or not recorded, skewing the data.</li>
-                    <li><strong>Peak Times:</strong> The analysis confirmed two major peaks for taxi demand: the evening rush hour (5 PM - 7 PM) and a later "going out" peak (10 PM - 12 AM).</li>
-                    <li><strong>Data Quality:</strong> A significant portion of the raw data (over 5-10% in some cases) had to be filtered due to invalid values, highlighting the critical importance of the Pig ETL step.</li>
-                </ul>
-            </section>
-        </main>
+  <div class="viewer" id="viewer">
+    <div id="loader" class="loader">
+      <svg width="20" height="20" viewBox="0 0 50 50" aria-hidden><circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-dasharray="31.4 31.4" transform="rotate(0 25 25)"><animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s" repeatCount="indefinite"></animateTransform></circle></svg>
+      <div>Loading report…</div>
     </div>
 
-    <footer>
-        <p>&copy; 2025 [Your Name Here] - All rights reserved.</p>
-    </footer>
+    <!-- The embedded report; change src if file is in a different path -->
+    <iframe id="reportFrame" src="project_report.html" title="Project report" sandbox="allow-same-origin allow-scripts"></iframe>
 
+    <!-- Fallback if iframe is blocked by server X-Frame-Options -->
+    <div id="blockedMessage" class="loader hidden" style="flex-direction:column; text-align:center; gap:8px;">
+      <div style="font-weight:600">Unable to display the report inline</div>
+      <div style="max-width:520px;color:var(--muted);">
+        The server hosting <strong>project_report.html</strong> appears to disallow embedding in an iframe (e.g. X-Frame-Options or Content-Security-Policy). To fix, allow embedding from this origin on the server or serve the file from the same origin.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const frame = document.getElementById('reportFrame');
+    const loader = document.getElementById('loader');
+    const blocked = document.getElementById('blockedMessage');
+
+    // Hide loader once iframe content has loaded
+    frame.addEventListener('load', () => {
+      // If iframe is same-origin we can check content; otherwise just hide loader
+      try {
+        // Accessing frame.contentDocument may throw if cross-origin
+        const doc = frame.contentDocument || frame.contentWindow.document;
+        // If title or body exist, assume loaded normally
+        if (doc && (doc.title || doc.body)) {
+          loader.classList.add('hidden');
+          blocked.classList.add('hidden');
+        } else {
+          loader.classList.add('hidden');
+        }
+      } catch (e) {
+        // Cross-origin frames will throw here; still hide loader
+        loader.classList.add('hidden');
+      }
+    });
+
+    // Some basic (lightweight) UI measures to discourage easy saving/copying:
+    // NOTE: these are not secure — users can still save, view-source, or fetch the file directly.
+    document.addEventListener('contextmenu', e => { e.preventDefault(); });
+    document.addEventListener('keydown', e => {
+      // Block Ctrl+S / Cmd+S, Ctrl+P (print), Ctrl+U (view source) and F12
+      if ((e.ctrlKey || e.metaKey) && ['s','p','u'].includes(e.key.toLowerCase())) {
+        e.preventDefault();
+      }
+      if (e.key === 'F12') e.preventDefault();
+    });
+
+    // Detect if iframe blocked by frame-ancestors or X-Frame-Options:
+    // If after 2.5s iframe still has empty document (and not cross-origin), show blocked msg.
+    setTimeout(() => {
+      try {
+        const doc = frame.contentDocument;
+        if (!doc || !doc.body || doc.body.childElementCount === 0) {
+          loader.classList.add('hidden');
+          blocked.classList.remove('hidden');
+        }
+      } catch (_) {
+        // cross-origin — can't determine; assume it's fine
+      }
+    }, 2500);
+  </script>
 </body>
 </html>
